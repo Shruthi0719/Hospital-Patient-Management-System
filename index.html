@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Patient Management</title>
+    <style>
+        /* --- Basic Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #005a9c;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* --- Forms --- */
+        form {
+            background: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for padding to work well */
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* --- Buttons --- */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #cancel-button {
+            background-color: #6c757d;
+            color: white;
+        }
+        #cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* --- Search Form --- */
+        #search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        #search-query {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* --- Status Messages --- */
+        #status-message {
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* --- Results --- */
+        #results-container {
+            margin-top: 20px;
+        }
+
+        .patient-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .patient-info strong {
+            color: #333;
+        }
+
+        .patient-info p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .patient-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 100px;
+        }
+
+        .patient-actions button {
+            width: 100%;
+        }
+
+        .update-btn {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .update-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏥 Hospital Patient Management System</h1>
+
+        <div id="status-message"></div>
+
+        <section>
+            <h2 id="form-title">Add New Patient</h2>
+            <form id="patient-form">
+                <input type="hidden" id="form-mode" value="add">
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patient_id">Patient ID*</label>
+                        <input type="text" id="patient_id" name="patient_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name">First Name*</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name*</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_number">Contact Number</label>
+                        <input type="tel" id="contact_number" name="contact_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address"></textarea>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" id="submit-button">Add Patient</button>
+                    <button type="button" id="cancel-button" style="display:none;">Cancel Update</button>
+                </div>
+            </form>
+        </section>
+
+        ---
+
+        <section>
+            <h2>Search Patients</h2>
+            <form id="search-form">
+                <input type="text" id="search-query" placeholder="Search by ID, First Name, or Last Name..." required>
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Search Results</h2>
+            <div id="results-container">
+                <p>No patients searched yet.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const patientForm = document.getElementById('patient-form');
+        const searchForm = document.getElementById('search-form');
+        const resultsContainer = document.getElementById('results-container');
+        const statusMessage = document.getElementById('status-message');
+        
+        // Form Elements
+        const formModeInput = document.getElementById('form-mode');
+        const formTitle = document.getElementById('form-title');
+        const submitButton = document.getElementById('submit-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const patientIdInput = document.getElementById('patient_id');
+        const searchQueryInput = document.getElementById('search-query');
+
+        const apiBaseUrl = 'http://localhost:3000/api/patients';
+
+        // --- Event Listeners ---
+        
+        // 1. Handle Add/Update Form Submission
+        patientForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(patientForm);
+            const data = Object.fromEntries(formData.entries());
+            const mode = formModeInput.value;
+
+            if (mode === 'add') {
+                await addPatient(data);
+            } else {
+                // The patient_id in the form field is the one we are editing
+                await updatePatient(data.patient_id, data);
+            }
+        });
+
+        // 2. Handle Search Form Submission
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchQueryInput.value;
+            if (!query) {
+                showStatus('Please enter a search term.', 'status-error');
+                return;
+            }
+            await searchPatients(query);
+        });
+
+        // 3. Handle Cancel Update Button
+        cancelButton.addEventListener('click', resetForm);
+
+
+        // --- API Functions ---
+
+        // CREATE: Add a new patient
+        async function addPatient(data) {
+            try {
+                const response = await fetch(apiBaseUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to add patient');
+                }
+
+                showStatus('Patient added successfully!', 'status-success');
+                patientForm.reset();
+                
+            } catch (err) {
+                console.error('Error adding patient:', err);
+                showStatus(err.message, 'status-error');
+            }
+        }
+
+        // READ: Search for patients
+        async function searchPatients(query) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/search?query=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.message || 'Failed to search');
+                }
+
+                const patients = await response.json();
+                displayResults(patients);
+                
+            } catch (err) {
+                console.error('Error searching patients:', err);
+                showStatus(err.message, 'status-error');
+            }
+        }
+
+        // UPDATE: Update an existing patient
+        async function updatePatient(patientId, data) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/${patientId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to update patient');
+                }
+
+                showStatus('Patient updated successfully!', 'status-success');
+                resetForm();
+                await searchPatients(searchQueryInput.value || patientId); // Refresh search results
+                
+            } catch (err) {
+                console.error('Error updating patient:', err);
+                showStatus(err.message, 'status-error');
+            }
+        }
+        
+        // DELETE: Delete a patient
+        async function deletePatient(patientId) {
+            if (!confirm(`Are you sure you want to delete patient ${patientId}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/${patientId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to delete patient');
+                }
+
+                showStatus('Patient deleted successfully!', 'status-success');
+                await searchPatients(searchQueryInput.value); // Refresh search results
+                
+            } catch (err) {
+                console.error('Error deleting patient:', err);
+                showStatus(err.message, 'status-error');
+            }
+        }
+
+
+        // --- UI Helper Functions ---
+
+        // Display search results in the DOM
+        function displayResults(patients) {
+            resultsContainer.innerHTML = ''; // Clear previous results
+
+            if (patients.length === 0) {
+                resultsContainer.innerHTML = '<p>No patients found.</p>';
+                return;
+            }
+
+            patients.forEach(patient => {
+                const card = document.createElement('div');
+                card.className = 'patient-card';
+
+                // Format DOB for display
+                let dobString = 'N/A';
+                if (patient.dob) {
+                    try {
+                        dobString = new Date(patient.dob).toLocaleDateString();
+                    } catch(e) { /* ignore invalid date */ }
+                }
+
+                card.innerHTML = `
+                    <div class="patient-info">
+                        <p><strong>Patient ID:</strong> ${patient.patient_id}</p>
+                        <p><strong>Name:</strong> ${patient.first_name || ''} ${patient.last_name || ''}</p>
+                        <p><strong>DOB:</strong> ${dobString}</p>
+                        <p><strong>Gender:</strong> ${patient.gender || 'N/A'}</p>
+                        <p><strong>Contact:</strong> ${patient.contact_number || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${patient.address || 'N/A'}</p>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="update-btn">Update</button>
+                        <button class="delete-btn">Delete</button>
+                    </div>
+                `;
+
+                // Add event listeners to the new buttons
+                card.querySelector('.update-btn').addEventListener('click', () => {
+                    loadPatientIntoForm(patient);
+                });
+                
+                card.querySelector('.delete-btn').addEventListener('click', () => {
+                    deletePatient(patient.patient_id);
+                });
+
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        // Populate the form with patient data for editing
+        function loadPatientIntoForm(patient) {
+            formModeInput.value = 'update';
+            formTitle.textContent = `Update Patient: ${patient.patient_id}`;
+            submitButton.textContent = 'Update Patient';
+            cancelButton.style.display = 'inline-block';
+
+            // Disable Patient ID field during update
+            patientIdInput.value = patient.patient_id;
+            patientIdInput.readOnly = true;
+
+            // Fill other fields
+            document.getElementById('first_name').value = patient.first_name || '';
+            document.getElementById('last_name').value = patient.last_name || '';
+            
+            // Format date for <input type="date">
+            let dobValue = '';
+            if (patient.dob) {
+                try {
+                    dobValue = new Date(patient.dob).toISOString().split('T')[0];
+                } catch(e) { /* ignore invalid date */ }
+            }
+            document.getElementById('dob').value = dobValue;
+
+            document.getElementById('gender').value = patient.gender || '';
+            document.getElementById('contact_number').value = patient.contact_number || '';
+            document.getElementById('address').value = patient.address || '';
+
+            // Scroll to the top to see the form
+            window.scrollTo(0, 0);
+        }
+
+        // Reset the form back to "Add" mode
+        function resetForm() {
+            patientForm.reset();
+            formModeInput.value = 'add';
+            formTitle.textContent = 'Add New Patient';
+            submitButton.textContent = 'Add Patient';
+            cancelButton.style.display = 'none';
+            patientIdInput.readOnly = false;
+            showStatus(''); // Clear status message
+        }
+
+        // Show a status message (e.g., success or error)
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = type; // e.g., 'status-success' or 'status-error'
+
+            if (message) {
+                // Auto-clear message after 5 seconds
+                setTimeout(() => {
+                    if (statusMessage.textContent === message) {
+                        statusMessage.textContent = '';
+                        statusMessage.className = '';
+                    }
+                }, 5000);
+            }
+        }
+
+    </script>
+</body>
+</html>
